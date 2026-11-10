@@ -1,0 +1,83 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* web_widget_duration
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-10 12:00+0000\n"
+"PO-Revision-Date: 2026-11-10 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sd"
+msgstr "%(amount)s Tg."
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sh"
+msgstr "%(amount)s Std."
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sm"
+msgstr "%(amount)s Min."
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sms"
+msgstr "%(amount)s ms"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)ss"
+msgstr "%(amount)s Sek."
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "Duration"
+msgstr "Dauer"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "day(s)"
+msgstr "Tag(e)"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "hour(s)"
+msgstr "Stunde(n)"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "millisecond(s)"
+msgstr "Millisekunde(n)"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "minute(s)"
+msgstr "Minute(n)"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "second(s)"
+msgstr "Sekunde(n)"
