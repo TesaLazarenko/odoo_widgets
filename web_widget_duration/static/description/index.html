@@ -1,0 +1,50 @@
+<div style="max-width: 1100px; margin: 0 auto; padding: 24px 16px; color: #111111; font-size: 16px; line-height: 1.5">
+
+<h2 class="text-center">Duration Widget</h2>
+<p class="lead text-center">A field widget that shows a number of seconds as days, hours, minutes, seconds and milliseconds.</p>
+<div class="text-center mb-4">
+<img src="banner.png" alt="Duration widget" style="display: inline-block; width: 100%; max-width: 1200px; height: auto">
+</div>
+
+<div class="d-flex flex-wrap row-gap-3 column-gap-4" style="display: flex">
+<div class="flex-grow-1" style="width: 300px">
+<h3>Usage</h3>
+<p>Set <code>widget="human_duration"</code> on a <code>float</code> or <code>integer</code> field holding seconds:</p>
+<p><code>&lt;field name="duration" widget="human_duration"/&gt;</code></p>
+<p><code>90061.5</code> is shown as <strong>1d 1h 1m 1s 500ms</strong>, <code>1.31</code> as <strong>1s 310ms</strong>. Zero units are skipped, an empty value shows nothing.</p>
+</div>
+<div class="flex-grow-1" style="width: 300px">
+<h3>Features</h3>
+<ul>
+<li>Form, list and kanban views.</li>
+<li>List group rows and totals use the same format.</li>
+<li>Unit symbols in the user language; the full unit name is shown on hover.</li>
+<li>Follows the alignment of its column: right in lists, like the other numeric columns, left in forms.</li>
+<li>Option <code>align</code>: <code>start</code>, <code>center</code> or <code>end</code> to force the alignment.</li>
+<li>Translations: Ukrainian, German, Polish.</li>
+<li>No Python models, depends on <code>web</code> only.</li>
+</ul>
+</div>
+</div>
+
+<h3 class="mt-4">List view</h3>
+<p>Profiling sessions grouped by session, the <code>duration</code> column with a sum. Before: the plain float field, seconds with decimals.</p>
+<div class="text-center mb-4">
+<img src="images/list_before.png" alt="List view: durations as plain floats" style="display: inline-block; width: 100%; max-width: 1200px; height: auto; border: 1px solid #D4D4D4; border-radius: 10px; border-right-width: 6px; border-bottom-width: 6px; border-right-color: #111111; border-bottom-color: #111111">
+</div>
+<p>After: <code>widget="human_duration"</code>. Rows, the group row and the total are readable at a glance; an empty duration shows nothing instead of a zero.</p>
+<div class="text-center mb-4">
+<img src="images/list_after.png" alt="List view: durations as days, hours, minutes, seconds and milliseconds" style="display: inline-block; width: 100%; max-width: 1200px; height: auto; border: 1px solid #D4D4D4; border-radius: 10px; border-right-width: 6px; border-bottom-width: 6px; border-right-color: #111111; border-bottom-color: #111111">
+</div>
+
+<h3 class="mt-4">Form view</h3>
+<p>Before: the plain float field.</p>
+<div class="text-center mb-4">
+<img src="images/form_before.png" alt="Form view: duration as a plain float" style="display: inline-block; width: 100%; max-width: 1200px; height: auto; border: 1px solid #D4D4D4; border-radius: 10px; border-right-width: 6px; border-bottom-width: 6px; border-right-color: #111111; border-bottom-color: #111111">
+</div>
+<p>After: the same field with the widget, lined up with the other fields of the form.</p>
+<div class="text-center mb-4">
+<img src="images/form_after.png" alt="Form view: duration with the widget" style="display: inline-block; width: 100%; max-width: 1200px; height: auto; border: 1px solid #D4D4D4; border-radius: 10px; border-right-width: 6px; border-bottom-width: 6px; border-right-color: #111111; border-bottom-color: #111111">
+</div>
+
+</div>

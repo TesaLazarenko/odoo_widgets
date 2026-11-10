@@ -1,0 +1,131 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* web_widget_duration
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-10 12:00+0000\n"
+"PO-Revision-Date: 2026-11-10 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sd"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sh"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sm"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)sms"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "%(amount)ss"
+msgstr ""
+
+#. module: web_widget_duration
+#: model:ir.module.module,description:base.module_web_widget_duration
+msgid ""
+"===============\n"
+"Duration Widget\n"
+"===============\n"
+"\n"
+"Field widget ``human_duration`` for ``float`` and ``integer`` fields that hold a number of seconds.\n"
+"The value is shown as days, hours, minutes, seconds and milliseconds, skipping the zero units:\n"
+"``90061.5`` becomes ``1d 1h 1m 1s 500ms``, ``1.31`` becomes ``1s 310ms``.\n"
+"\n"
+"Usage\n"
+"=====\n"
+"\n"
+".. code-block:: xml\n"
+"\n"
+"    <field name=\"duration\" widget=\"human_duration\"/>\n"
+"    <field name=\"duration\" widget=\"human_duration\" options=\"{'align': 'center'}\"/>\n"
+"\n"
+"- The widget follows the alignment of its column or cell: right in lists, like the other\n"
+"  numeric columns and their header, left in forms.\n"
+"- ``align``: ``start``, ``center`` or ``end`` forces the alignment.\n"
+"- List group rows and totals are formatted the same way (``registry.category(\"formatters\")``).\n"
+"- Unit symbols are translated (uk, de, pl); the full unit name is the tooltip of each part.\n"
+"\n"
+"JavaScript API\n"
+"==============\n"
+"\n"
+"``@web_widget_duration/duration_field`` exports ``durationParts(seconds)``,\n"
+"``formatDuration(seconds)``, ``DurationField`` and ``durationField`` for reuse in other widgets,\n"
+"for example to show tracked durations in the chatter.\n"
+"\n"
+"Credits\n"
+"=======\n"
+"\n"
+"Taras Shabaranskyi, LGPL-3.\n"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "Duration"
+msgstr ""
+
+#. module: web_widget_duration
+#: model:ir.module.module,shortdesc:base.module_web_widget_duration
+msgid "Duration Widget"
+msgstr ""
+
+#. module: web_widget_duration
+#: model:ir.module.module,summary:base.module_web_widget_duration
+msgid ""
+"Show a duration in seconds as days, hours, minutes, seconds and milliseconds"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "day(s)"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "hour(s)"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "millisecond(s)"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "minute(s)"
+msgstr ""
+
+#. module: web_widget_duration
+#. odoo-javascript
+#: code:addons/web_widget_duration/static/src/duration_field.js:0
+msgid "second(s)"
+msgstr ""
