@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates>
+    <t t-name="web_widget_duration.DurationField">
+        <span t-attf-class="o_human_duration {{props.align ? 'd-flex justify-content-' + props.align : 'd-inline-flex'}} flex-row gap-1">
+            <t t-foreach="parts" t-as="part" t-key="part.unit">
+                <span t-att-title="part.title" t-out="part.text"/>
+            </t>
+        </span>
+    </t>
+</templates>
