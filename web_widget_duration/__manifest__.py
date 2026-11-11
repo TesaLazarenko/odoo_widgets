@@ -6,7 +6,7 @@
     "name": "Duration Widget",
     "summary": "Show a duration in seconds as days, hours, minutes, seconds and milliseconds",
     "category": "Technical",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "author": "Taras Shabaranskyi",
     "maintainer": "Taras Shabaranskyi",
     "website": "https://github.com/TesaLazarenko/odoo_widgets",

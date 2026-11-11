@@ -11,7 +11,9 @@ const UNITS = [
     { unit: "hours", size: 3_600_000 * MS },
     { unit: "minutes", size: 60_000 * MS },
     { unit: "seconds", size: 1_000 * MS },
+    { unit: "milliseconds", size: MS },
 ];
+export const DURATION_UNITS = UNITS.map(({ unit }) => unit);
 // the amount with the unit symbol of the user's language: 1s in English, 1 с in Ukrainian
 const UNIT_FORMATS = {
     days: (amount) => _t("%(amount)sd", { amount }),
@@ -33,30 +35,73 @@ function part(unit, amount) {
     return { unit, title: UNIT_NAMES[unit], text: UNIT_FORMATS[unit](text) };
 }
 
-export function durationParts(seconds) {
-    let rest = Math.max(0, Math.round((seconds || 0) * 1_000 * MS));
-    const parts = [];
-    for (const { unit, size } of UNITS) {
-        const amount = Math.floor(rest / size);
-        rest -= amount * size;
-        if (amount > 0) {
-            parts.push(part(unit, amount));
-        }
+// min_unit "auto": the smallest unit worth showing next to the largest non-zero one;
+// seconds alone keep their fraction instead of milliseconds: 59.6s, not 59s 600ms
+const AUTO_MIN_UNITS = {
+    days: "minutes",
+    hours: "seconds",
+    minutes: "seconds",
+    seconds: "seconds",
+    milliseconds: "milliseconds",
+};
+export const MIN_UNITS = [...DURATION_UNITS, "auto"];
+
+// index of the smallest unit shown and whether it keeps a fraction: min_unit, for "auto" the
+// AUTO_MIN_UNITS entry of the largest non-zero unit, capped by max_units counted from that unit;
+// milliseconds always keep their fraction, seconds do when "auto" shows them alone
+function smallestUnit(rest, { maxUnits, minUnit }) {
+    const first = UNITS.findIndex(({ size }) => rest >= size);
+    const largest = first === -1 ? UNITS.length - 1 : first;
+    const auto = minUnit === "auto";
+    const unit = auto ? AUTO_MIN_UNITS[DURATION_UNITS[largest]] : minUnit;
+    let last = DURATION_UNITS.includes(unit) ? DURATION_UNITS.indexOf(unit) : UNITS.length - 1;
+    if (maxUnits > 0) {
+        last = Math.min(last, largest + Math.floor(maxUnits) - 1);
     }
-    if (rest > 0) {
-        parts.push(part("milliseconds", rest / MS));
+    const fraction = last === UNITS.length - 1 || (auto && DURATION_UNITS[largest] === "seconds");
+    return { last, fraction };
+}
+
+export function durationParts(seconds, options = {}) {
+    const sign = seconds < 0 ? -1 : 1;
+    let rest = Math.round(Math.abs(seconds || 0) * 1_000 * MS);
+    const { last, fraction } = smallestUnit(rest, options);
+    // the smallest unit rounds to whole ones, or to the two decimals shown when it keeps a fraction
+    const step = fraction ? UNITS[last].size / 100 : UNITS[last].size;
+    rest = Math.round(rest / step) * step;
+    const parts = [];
+    for (const [index, { unit, size }] of UNITS.slice(0, last + 1).entries()) {
+        const amount = fraction && index === last ? rest / size : Math.floor(rest / size);
+        rest -= Math.floor(amount) * size;
+        if (amount > 0) {
+            parts.push(part(unit, parts.length ? amount : sign * amount));
+        }
     }
     return parts;
 }
 
-export function formatDuration(value) {
+export function durationOptions(options = {}) {
+    return { maxUnits: options.max_units, minUnit: options.min_unit };
+}
+
+export function hasDurationOptions(options = {}) {
+    return options.max_units !== undefined || options.min_unit !== undefined;
+}
+
+// values shown without the field component (list group rows and totals, pivot, graph) follow
+// min_unit "auto" unless max_units or min_unit is given
+export function formatDuration(value, options = {}) {
     if (value === false) {
         return "";
     }
-    return durationParts(value)
+    const { maxUnits, minUnit = maxUnits === undefined ? "auto" : undefined } = options;
+    return durationParts(value, { maxUnits, minUnit })
         .map((part) => part.text)
         .join(" ");
 }
+
+// pivot passes the options of its measure to the formatter; graph and list group rows do not
+formatDuration.extractOptions = ({ options }) => durationOptions(options);
 
 export class DurationField extends Component {
     static template = "web_widget_duration.DurationField";
@@ -67,10 +112,21 @@ export class DurationField extends Component {
             optional: true,
             validate: (align) => ["start", "center", "end"].includes(align),
         },
+        maxUnits: {
+            type: Number,
+            optional: true,
+            validate: (maxUnits) => Number.isInteger(maxUnits) && maxUnits > 0,
+        },
+        minUnit: {
+            type: String,
+            optional: true,
+            validate: (minUnit) => MIN_UNITS.includes(minUnit),
+        },
     };
 
     get parts() {
-        return durationParts(this.props.record.data[this.props.name]);
+        const { maxUnits, minUnit } = this.props;
+        return durationParts(this.props.record.data[this.props.name], { maxUnits, minUnit });
     }
 }
 
@@ -78,7 +134,7 @@ export const durationField = {
     component: DurationField,
     displayName: _t("Duration"),
     supportedTypes: ["float", "integer"],
-    extractProps: ({ options }) => ({ align: options.align }),
+    extractProps: ({ options }) => ({ align: options.align, ...durationOptions(options) }),
 };
 
 registry.category("fields").add("human_duration", durationField);
