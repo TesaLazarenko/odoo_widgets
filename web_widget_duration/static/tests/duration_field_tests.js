@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { getFixture } from "@web/../tests/helpers/utils";
+import { click, getFixture } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { durationParts, formatDuration } from "@web_widget_duration/duration_field";
 
@@ -38,6 +38,28 @@ QUnit.module("web_widget_duration", (hooks) => {
                         { id: 2, duration: 1.31, seconds: 0 },
                     ],
                 },
+                task: {
+                    fields: {
+                        team: { string: "Team", type: "char", searchable: true, sortable: true },
+                        duration: {
+                            string: "Duration",
+                            type: "float",
+                            group_operator: "sum",
+                            searchable: true,
+                        },
+                        plain: {
+                            string: "Plain",
+                            type: "float",
+                            group_operator: "sum",
+                            searchable: true,
+                        },
+                    },
+                    records: [
+                        { id: 1, team: "A", duration: 90061.5, plain: 90061.5 },
+                        { id: 2, team: "A", duration: 3599.6, plain: 3599.6 },
+                        { id: 3, team: "B", duration: -75.5, plain: -75.5 },
+                    ],
+                },
             },
         };
         setupViewRegistries();
@@ -54,9 +76,153 @@ QUnit.module("web_widget_duration", (hooks) => {
         );
         assert.strictEqual(formatDuration(0.0004), "0.4ms");
         assert.strictEqual(formatDuration(120), "2m");
-        assert.strictEqual(formatDuration(-5), "");
+        assert.strictEqual(formatDuration(-5), "-5s");
         assert.strictEqual(formatDuration(0), "");
         assert.strictEqual(formatDuration(false), "");
+    });
+
+    QUnit.test("max_units and min_unit round to the smallest unit shown", (assert) => {
+        assert.strictEqual(formatDuration(90061.5, { maxUnits: 2 }), "1d 1h");
+        assert.strictEqual(formatDuration(86700, { maxUnits: 2 }), "1d", "zero units count");
+        assert.strictEqual(formatDuration(3599.6, { maxUnits: 2 }), "1h", "rounding carries");
+        assert.strictEqual(formatDuration(1.0004, { maxUnits: 2 }), "1s 0.4ms");
+        assert.strictEqual(formatDuration(90061.5, { minUnit: "minutes" }), "1d 1h 1m");
+        assert.strictEqual(formatDuration(90061.5, { maxUnits: 3, minUnit: "hours" }), "1d 1h");
+        assert.strictEqual(formatDuration(1.31, { minUnit: "seconds" }), "1s");
+        assert.strictEqual(formatDuration(0.4, { minUnit: "seconds" }), "");
+    });
+
+    QUnit.test("min_unit auto drops the units too small for the largest one", (assert) => {
+        const auto = { minUnit: "auto" };
+        assert.strictEqual(formatDuration(90061.5, auto), "1d 1h 1m", "days down to minutes");
+        assert.strictEqual(formatDuration(3725.125, auto), "1h 2m 5s", "hours down to seconds");
+        assert.strictEqual(formatDuration(75.5, auto), "1m 16s", "minutes down to seconds");
+        assert.strictEqual(formatDuration(59.6, auto), "59.6s", "seconds alone keep a fraction");
+        assert.strictEqual(formatDuration(1.31, auto), "1.31s");
+        assert.strictEqual(formatDuration(12.34567, auto), "12.35s", "rounded to two decimals");
+        assert.strictEqual(formatDuration(1.0004, auto), "1s");
+        assert.strictEqual(formatDuration(59.999, auto), "1m", "rounding carries to minutes");
+        assert.strictEqual(formatDuration(-1.31, auto), "-1.31s");
+        assert.strictEqual(formatDuration(0.0004, auto), "0.4ms");
+        assert.strictEqual(formatDuration(3599.6, auto), "1h", "rounding carries");
+        assert.strictEqual(formatDuration(-90061.5, auto), "-1d 1h 1m");
+        assert.strictEqual(formatDuration(3725.125, { ...auto, maxUnits: 2 }), "1h 2m");
+    });
+
+    QUnit.test("without max_units and min_unit the formatter follows min_unit auto", (assert) => {
+        assert.strictEqual(formatDuration(90061.5), "1d 1h 1m");
+        assert.strictEqual(formatDuration(1.0004), "1s");
+        assert.strictEqual(formatDuration(90061.5, { minUnit: "milliseconds" }), "1d 1h 1m 1s 500ms");
+        assert.strictEqual(formatDuration(90061.5, { maxUnits: 4 }), "1d 1h 1m 2s");
+    });
+
+    QUnit.test("pivot formats the measure with the widget", async (assert) => {
+        await makeView({
+            serverData,
+            type: "pivot",
+            resModel: "partner",
+            arch: `<pivot><field name="duration" type="measure" widget="human_duration"/></pivot>`,
+        });
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_pivot_cell_value")].map((cell) => cell.textContent.trim()),
+            ["1d 1h 1m"]
+        );
+    });
+
+    QUnit.test("negative durations keep their sign on the first unit", (assert) => {
+        assert.strictEqual(formatDuration(-75.5, { minUnit: "milliseconds" }), "-1m 15s 500ms");
+        assert.deepEqual(
+            durationParts(-75.5).map((part) => part.text),
+            ["-1m", "15s", "500ms"]
+        );
+        assert.strictEqual(formatDuration(-0.0004), "-0.4ms");
+        assert.strictEqual(formatDuration(-75.5, { maxUnits: 2 }), "-1m 16s");
+        assert.strictEqual(formatDuration(-0.4, { minUnit: "seconds" }), "", "no negative zero");
+    });
+
+    QUnit.test("form view applies max_units and min_unit", async (assert) => {
+        await makeView({
+            serverData,
+            type: "form",
+            resModel: "task",
+            resId: 1,
+            arch: `
+                <form>
+                    <field name="duration" widget="human_duration" options="{'min_unit': 'minutes'}"/>
+                    <field name="plain" widget="human_duration" options="{'max_units': 1}"/>
+                </form>`,
+        });
+        assert.deepEqual(
+            [...target.querySelectorAll(".o_human_duration")].map((widget) => widget.textContent),
+            ["1d1h1m", "1d"]
+        );
+    });
+
+    QUnit.test("list rows, group rows and totals use max_units", async (assert) => {
+        await makeView({
+            serverData,
+            type: "list",
+            resModel: "task",
+            arch: `
+                <tree>
+                    <field name="team"/>
+                    <field name="duration" widget="human_duration" options="{'max_units': 2}" sum="Total"/>
+                    <field name="plain" widget="human_duration" options="{'min_unit': 'milliseconds'}" sum="Total"/>
+                </tree>`,
+        });
+        const cells = (selector) =>
+            [...target.querySelectorAll(selector)].map((cell) => cell.textContent.trim());
+        assert.deepEqual(cells(".o_data_row td[name=duration]"), ["1d1h", "1h", "-1m16s"]);
+        assert.deepEqual(cells("tfoot td").filter(Boolean), [
+            "1d 2h",
+            "1d 1h 59m 45s 600ms",
+        ]);
+    });
+
+    QUnit.test("grouped list formats group rows and totals with max_units", async (assert) => {
+        await makeView({
+            serverData,
+            type: "list",
+            resModel: "task",
+            groupBy: ["team"],
+            arch: `
+                <tree>
+                    <field name="team"/>
+                    <field name="duration" widget="human_duration" options="{'max_units': 2}" sum="Total"/>
+                    <field name="plain" widget="human_duration" options="{'min_unit': 'milliseconds'}" sum="Total"/>
+                </tree>`,
+        });
+        const groups = [...target.querySelectorAll(".o_group_header")].map((row) =>
+            [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim()).filter(Boolean)
+        );
+        assert.deepEqual(groups, [
+            ["1d 2h", "1d 2h 1m 1s 100ms"],
+            ["-1m 16s", "-1m 15s 500ms"],
+        ]);
+        assert.deepEqual(
+            [...target.querySelectorAll("tfoot td")].map((cell) => cell.textContent.trim()).filter(Boolean),
+            ["1d 2h", "1d 1h 59m 45s 600ms"]
+        );
+    });
+
+    QUnit.test("grouped list applies min_unit auto to rows, groups and totals", async (assert) => {
+        await makeView({
+            serverData,
+            type: "list",
+            resModel: "task",
+            groupBy: ["team"],
+            arch: `
+                <tree>
+                    <field name="team"/>
+                    <field name="plain" widget="human_duration" options="{'min_unit': 'auto'}" sum="Total"/>
+                </tree>`,
+        });
+        const texts = (selector) =>
+            [...target.querySelectorAll(selector)].map((cell) => cell.textContent.trim()).filter(Boolean);
+        assert.deepEqual(texts(".o_group_header td"), ["1d 2h 1m", "-1m 16s"]);
+        assert.deepEqual(texts("tfoot td"), ["1d 2h"]);
+        await click(target.querySelector(".o_group_header"));
+        assert.deepEqual(texts(".o_data_row td[name=plain]"), ["1d1h1m", "1h"]);
     });
 
     QUnit.test("form view follows the cell alignment", async (assert) => {
@@ -141,7 +307,8 @@ QUnit.module("web_widget_duration", (hooks) => {
         assert.hasClass(cells[1], "justify-content-center");
         assert.strictEqual(
             target.querySelector("tfoot td:nth-child(2)").textContent,
-            "1d 1h 1m 2s 810ms"
+            "1d 1h 1m",
+            "the total follows min_unit auto, the rows keep every unit"
         );
     });
 });
